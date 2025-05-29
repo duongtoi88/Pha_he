@@ -67,7 +67,7 @@
         <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
         <div class="line">${person["Năm sinh"] || "-"} – ${person["Năm mất"] || "-"}</div>
         <div class="line"><img src="images/${id}.png" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
-        <div class="line"><b>Vợ:</b><br>
+        <div class="line"><b>Vợ/Chồng:</b><br>
           ${wives.length ? wives.map(w => `- ${w["Họ và tên"] || "-"}`).join("<br>") : "-"}
         </div>
         <div class="line"><b>Con:</b><br>
