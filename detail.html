@@ -42,6 +42,9 @@
       <select id="idSelector"></select>
     </div>
     <div id="info">Đang tải...</div>
+      <div style="text-align: center; margin-top: 20px;">
+      <a id="backToTree" class="btn-back" href="#">← Quay lại Phả hệ</a>
+    </div>
   </div>
 
   <script>
@@ -102,7 +105,9 @@
         const id = urlParams.get("id") || allRows[0].ID;
         select.value = id;
         renderPerson(id);
-
+        const backBtn = document.getElementById("backToTree");
+        if (backBtn) backBtn.href = `index.html`;
+        
         select.onchange = () => {
           const selectedID = select.value;
           renderPerson(selectedID);
