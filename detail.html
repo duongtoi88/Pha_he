@@ -52,7 +52,10 @@
         document.getElementById("info").innerHTML = "Không tìm thấy dữ liệu.";
         return;
       }
-
+      // Gán lại href của nút "Phả hệ" đúng theo ID
+      const backBtn = document.getElementById("backToTree");
+      if (backBtn) backBtn.href = `index.html?id=${id}`;
+      
       const wives = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
       const children = allRows
         .filter(c => String(c["ID cha"]).replace('.0', '') === id)
