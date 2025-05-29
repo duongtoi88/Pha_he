@@ -145,7 +145,7 @@ function drawTree(data) {
     .attr('height', 120)
     .attr('rx', 10)
     .attr('ry', 10)
-    .attr('class', d => d.data.dinh === 'x' ? 'dinh-x' : 'dinh-thuong')
+    .attr('class', d => d.data.dinh === 'x' ? 'dinh-x' : 'dinh-thuong');
 
   // Họ tên
   node.append('text')
