@@ -134,6 +134,8 @@ function drawTree(data) {
     .attr('class', 'node')
     .attr('transform', d => `translate(${d.x},${d.y})`)
     .on('click', (event, d) => openDetailTab(d.data.id));
+    .on('mouseover', (event, d) => showQuickTooltip(event, d.data))
+    .on('mouseout', () => document.getElementById('tooltip').style.display = 'none');
 
   // Màu sắc phân biệt theo Đinh
   node.append('rect')
@@ -160,6 +162,29 @@ function drawTree(data) {
     .style('font-size', '12px')
     .attr('fill', 'black')
     .text(d => (d.data.birth || '') + ' - ' + (d.data.death || ''));
+}
+
+function showQuickTooltip(event, data) {
+  const wives = window.rawRows.filter(r => {
+    const idChong = String(r["ID chồng"] || "").replace('.0', '');
+    return idChong === data.id;
+  });
+
+  const children = data.children || [];
+
+  const html = `
+    <div><b>${data.name || "-"}</b> – Đời ${data.doi || "-"}</div>
+    <div>${data.birth || "-"} – ${data.death || "-"}</div>
+    <div><b>Vợ:</b> ${wives.length ? wives.map(w => w["Họ và tên"]).join(", ") : "-"}</div>
+    <div><b>Con:</b> ${children.length ? children.map(c => c.name).join(", ") : "-"}</div>
+  `;
+
+  const tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = html;
+  tooltip.style.display = 'block';
+  tooltip.style.left = (event.pageX + 10) + 'px';
+  tooltip.style.top = (event.pageY + 10) + 'px';
+  tooltip.style.textAlign = 'left';
 }
 
 // Click mở tab chi tiết
