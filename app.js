@@ -86,11 +86,20 @@ function convertToSubTree(rows, rootID) {
   });
 
   // Gán con cho cha
-  Object.values(treePeople).forEach(p => {
-    if (p.father && treePeople[p.father]) {
-      treePeople[p.father].children.push(p);
-    }
+Object.values(treePeople).forEach(p => {
+  if (p.father && treePeople[p.father]) {
+    treePeople[p.father].children.push(p);
+  }
+});
+
+// 🔽 Sắp xếp con theo năm sinh tăng dần
+Object.values(treePeople).forEach(p => {
+  p.children.sort((a, b) => {
+    const aYear = parseInt(a.birth) || 9999;
+    const bYear = parseInt(b.birth) || 9999;
+    return aYear - bYear;
   });
+});
 
   return treePeople[rootID];
 }
