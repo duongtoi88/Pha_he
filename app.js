@@ -134,7 +134,7 @@ function drawTree(data) {
     .attr('class', 'node')
     .attr('transform', d => `translate(${d.x},${d.y})`)
     .on('click', (event, d) => openDetailTab(d.data.id));
-    .on('mouseover', (event, d) => showQuickTooltip(event, d.data))
+    .on('mouseover', (event, d) => showQuickTooltip(event, d.data));
     .on('mouseout', () => document.getElementById('tooltip').style.display = 'none');
 
   // Màu sắc phân biệt theo Đinh
