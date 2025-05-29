@@ -188,5 +188,5 @@ function showQuickTooltip(event, data) {
 }
 // Click mở tab chi tiết
 function openDetailTab(id) {
-  window.open(`detail.html?id=${id}`, '_blank');
+  window.location.href = `detail.html?id=${id}`;
 }
