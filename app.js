@@ -163,7 +163,7 @@ function drawTree(data) {
     .attr('fill', 'black')
     .text(d => (d.data.birth || '') + ' - ' + (d.data.death || ''));
 }
-
+// Tooltip ngắn khi hover
 function showQuickTooltip(event, data) {
   const wives = window.rawRows.filter(r => {
     const idChong = String(r["ID chồng"] || "").replace('.0', '');
@@ -175,8 +175,8 @@ function showQuickTooltip(event, data) {
   const html = `
     <div><b>${data.name || "-"}</b> – Đời ${data.doi || "-"}</div>
     <div>${data.birth || "-"} – ${data.death || "-"}</div>
-    <div><b>Vợ:</b> ${wives.length ? wives.map(w => w["Họ và tên"]).join(", ") : "-"}</div>
-    <div><b>Con:</b> ${children.length ? children.map(c => c.name).join(", ") : "-"}</div>
+    <div><b>Vợ:</b> ${wives.length ? wives.map(w => `- ${w["Họ và tên"]}`).join("<br>") : "-"}</div>
+    <div><b>Con:</b> ${children.length ? children.map(c => `- ${c.name}`).join("<br>") : "-"}</div>
   `;
 
   const tooltip = document.getElementById("tooltip");
@@ -186,7 +186,6 @@ function showQuickTooltip(event, data) {
   tooltip.style.top = (event.pageY + 10) + 'px';
   tooltip.style.textAlign = 'left';
 }
-
 // Click mở tab chi tiết
 function openDetailTab(id) {
   window.open(`detail.html?id=${id}`, '_blank');
