@@ -175,7 +175,7 @@ function showQuickTooltip(event, data) {
   const html = `
     <div><b>${data.name || "-"}</b> – Đời ${data.doi || "-"}</div>
     <div>${data.birth || "-"} – ${data.death || "-"}</div>
-    <div><b>Vợ:</b> ${wives.length ? wives.map(w => `- ${w["Họ và tên"]}`).join("<br>") : "-"}</div>
+    <div><b>Vợ/Chồng:</b> ${wives.length ? wives.map(w => `- ${w["Họ và tên"]}`).join("<br>") : "-"}</div>
     <div><b>Con:</b> ${children.length ? children.map(c => `- ${c.name}`).join("<br>") : "-"}</div>
   `;
 
