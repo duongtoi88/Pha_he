@@ -17,7 +17,7 @@ body {
 }
 
 .node rect.dinh-thuong {
-  fill: #d1ecf1;
+  fill: #ffffff; /* Màu trắng */
   stroke: #0c5460;
 }
 .node text {
