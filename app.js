@@ -111,7 +111,7 @@ function drawTree(data) {
   // Tính số đời (depth) lớn nhất
   const root = d3.hierarchy(data);
   const maxDepth = d3.max(root.descendants(), d => d.depth);
-  const nodeHeight = 180; // khoảng cách giữa các đời
+  const nodeHeight = 300; // khoảng cách giữa các đời
 
   // Tính chiều cao theo số đời
   const height = (maxDepth + 1) * nodeHeight;
@@ -120,7 +120,7 @@ function drawTree(data) {
     .attr('width', width)
     .attr('height', height)
     .append('g')
-    .attr('transform', 'translate(80,120)');
+    .attr('transform', 'translate(80,50)');
 
   // Thiết lập layout cây
   const treeLayout = d3.tree().size([width - 160, height - 200]); // trừ padding trên/dưới
