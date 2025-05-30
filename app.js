@@ -118,9 +118,9 @@ function drawTree(data) {
 
   const svg = d3.select('#tree-container').append('svg')
     .attr('width', width)
-    .attr('height', height+30)
+    .attr('height', height+100)
     .append('g')
-    .attr('transform', 'translate(80,50)');
+    .attr('transform', 'translate(80,40)');
 
   // Thiết lập layout cây
   const treeLayout = d3.tree().size([width - 160, height - 100]); // trừ padding trên/dưới
