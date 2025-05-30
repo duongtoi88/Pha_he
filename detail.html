@@ -93,7 +93,10 @@
         <div class="line"><b>Con:</b><br>
           ${children.length ? children.map(c => `- ${c["Họ và tên"] || "-"}`).join("<br>") : "-"}
         </div>
-        <div class="line"><b>Thông tin chi tiết:</b><br>${person["Thông tin chi tiết"] || "-"}</div>
+        <div class="line"><b>Thông tin chi tiết:</b><br>${person["Thông tin chi tiết"] || "-"}
+          ${person["Kỵ nhật"] ? `<br><b>Kỵ nhật:</b> ${person["Kỵ nhật"]}` : ""}
+          ${person["Táng"] ? `<br><b>Táng:</b> ${person["Táng"]}` : ""}
+        </div>
       `;
       document.getElementById("info").innerHTML = html;
     }
