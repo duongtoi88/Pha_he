@@ -111,7 +111,7 @@ function drawTree(data) {
   // Tính số đời (depth) lớn nhất
   const root = d3.hierarchy(data);
   const maxDepth = d3.max(root.descendants(), d => d.depth);
-  const nodeHeight = 300; // khoảng cách giữa các đời
+  const nodeHeight = 200; // khoảng cách giữa các đời
 
   // Tính chiều cao theo số đời
   const height = (maxDepth + 1) * nodeHeight;
@@ -150,11 +150,27 @@ function drawTree(data) {
 
   // Vẽ đường nối
   svg.selectAll('.link')
-    .data(root.links())
-    .enter()
-    .append('path')
-    .attr('class', 'link')
-    .attr('d', d3.linkVertical().x(d => d.x).y(d => d.y));
+  .data(root.links())
+  .enter()
+  .append('path')
+  .attr('class', 'link')
+  .attr('fill', 'none')
+  .attr('stroke', '#555')
+  .attr('stroke-width', 2)
+  .attr('d', d => {
+    const x1 = d.source.x;
+    const y1 = d.source.y;
+    const x2 = d.target.x;
+    const y2 = d.target.y;
+    const midY = (y1 + y2) / 2;
+
+    return `
+      M ${x1},${y1}
+      V ${midY}
+      H ${x2}
+      V ${y2}
+    `;
+  });
 
   // Tạo node
   const node = svg.selectAll('.node')
