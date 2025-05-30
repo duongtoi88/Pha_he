@@ -118,12 +118,12 @@ function drawTree(data) {
 
   const svg = d3.select('#tree-container').append('svg')
     .attr('width', width)
-    .attr('height', height)
+    .attr('height', height+30)
     .append('g')
     .attr('transform', 'translate(80,50)');
 
   // Thiết lập layout cây
-  const treeLayout = d3.tree().size([width - 160, height - 200]); // trừ padding trên/dưới
+  const treeLayout = d3.tree().size([width - 160, height - 100]); // trừ padding trên/dưới
   treeLayout(root);
   const g = svg; // g là group đã append('g')
 
