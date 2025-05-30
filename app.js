@@ -106,13 +106,13 @@ Object.values(treePeople).forEach(p => {
 
 // Vẽ cây phả hệ bằng D3.js
 function drawTree(data) {
-  const width = 1600, height = 1000;
+  const width = 1600, height = window.innerHeight;
 
   const svg = d3.select('#tree-container').append('svg')
     .attr('width', width)
     .attr('height', height)
     .append('g')
-    .attr('transform', 'translate(80,80)');
+    .attr('transform', 'translate(80,120)');
 
   const root = d3.hierarchy(data);
   const treeLayout = d3.tree().size([width - 160, height - 100]);
