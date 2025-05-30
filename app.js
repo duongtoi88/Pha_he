@@ -106,7 +106,15 @@ Object.values(treePeople).forEach(p => {
 
 // Vẽ cây phả hệ bằng D3.js
 function drawTree(data) {
-  const width = 1600, height = window.innerHeight;
+  const width = 1600;
+
+  // Tính số đời (depth) lớn nhất
+  const root = d3.hierarchy(data);
+  const maxDepth = d3.max(root.descendants(), d => d.depth);
+  const nodeHeight = 180; // khoảng cách giữa các đời
+
+  // Tính chiều cao theo số đời
+  const height = (maxDepth + 1) * nodeHeight;
 
   const svg = d3.select('#tree-container').append('svg')
     .attr('width', width)
@@ -114,8 +122,8 @@ function drawTree(data) {
     .append('g')
     .attr('transform', 'translate(80,120)');
 
-  const root = d3.hierarchy(data);
-  const treeLayout = d3.tree().size([width - 160, height - 100]);
+  // Thiết lập layout cây
+  const treeLayout = d3.tree().size([width - 160, height - 200]); // trừ padding trên/dưới
   treeLayout(root);
   const g = svg; // g là group đã append('g')
 
