@@ -33,6 +33,14 @@
       margin-bottom: 20px;
       padding: 6px;
     }
+    .btn-back {
+      text-decoration: none;
+      font-weight: bold;
+      background: #007bff;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -42,7 +50,7 @@
       <select id="idSelector"></select>
     </div>
     <div id="info">Đang tải...</div>
-      <div style="text-align: center; margin-top: 20px;">
+    <div style="text-align: center; margin-top: 20px;">
       <a id="backToTree" class="btn-back" href="#">← Quay lại Phả hệ</a>
     </div>
   </div>
@@ -56,22 +64,31 @@
         document.getElementById("info").innerHTML = "Không tìm thấy dữ liệu.";
         return;
       }
+      const isFemale = !person["Đinh"] || person["Đinh"] !== "x";
+      let spouse = [];
+      let children = [];
 
-      const wives = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
-      const children = allRows
-        .filter(c => String(c["ID cha"]).replace('.0', '') === id)
-        .sort((a, b) => {
-          const ay = parseInt(a["Năm sinh"]) || 9999;
-          const by = parseInt(b["Năm sinh"]) || 9999;
-          return ay - by;
-        });
+      if (isFemale) {
+        const husband = allRows.find(p => String(p.ID).replace('.0', '') === String(person["ID chồng"]).replace('.0', ''));
+        if (husband) spouse.push(husband);
+        children = allRows.filter(c => String(c["ID mẹ"]).replace('.0', '') === id);
+      } else {
+        spouse = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
+        children = allRows.filter(c => String(c["ID cha"]).replace('.0', '') === id);
+      }
+
+      children.sort((a, b) => {
+        const ay = parseInt(a["Năm sinh"]) || 9999;
+        const by = parseInt(b["Năm sinh"]) || 9999;
+        return ay - by;
+      });
 
       const html = `
         <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
         <div class="line">${person["Năm sinh"] || "-"} – ${person["Năm mất"] || "-"}</div>
         <div class="line"><img src="images/${id}.png" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
         <div class="line"><b>Vợ/Chồng:</b><br>
-          ${wives.length ? wives.map(w => `- ${w["Họ và tên"] || "-"}`).join("<br>") : "-"}
+          ${spouse.length ? spouse.map(s => `- ${s["Họ và tên"] || "-"}`).join("<br>") : "-"}
         </div>
         <div class="line"><b>Con:</b><br>
           ${children.length ? children.map(c => `- ${c["Họ và tên"] || "-"}`).join("<br>") : "-"}
@@ -105,6 +122,7 @@
         const id = urlParams.get("id") || allRows[0].ID;
         select.value = id;
         renderPerson(id);
+
         const backBtn = document.getElementById("backToTree");
         if (backBtn) backBtn.href = `index.html`;
         
