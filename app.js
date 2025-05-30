@@ -112,7 +112,7 @@ function drawTree(data) {
     .attr('width', width)
     .attr('height', height)
     .append('g')
-    .attr('transform', 'translate(80,40)');
+    .attr('transform', 'translate(80,80)');
 
   const root = d3.hierarchy(data);
   const treeLayout = d3.tree().size([width - 160, height - 100]);
