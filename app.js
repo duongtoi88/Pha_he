@@ -196,7 +196,7 @@ function drawTree(data) {
   // Họ tên
   node.append('text')
     .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(20, 0) rotate(0)')
+    .attr('transform', 'translate(10, 0) rotate(0)')
     .style('font-size', '12px')
     .attr('fill', 'black')
     .text(d => d.data.name);
@@ -204,7 +204,7 @@ function drawTree(data) {
   // Năm sinh - năm mất
   node.append('text')
     .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(-20, 0) rotate(0)')
+    .attr('transform', 'translate(-10, 0) rotate(0)')
     .style('font-size', '12px')
     .attr('fill', 'black')
     .text(d => (d.data.birth || '') + ' - ' + (d.data.death || ''));
