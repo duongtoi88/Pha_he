@@ -117,6 +117,28 @@ function drawTree(data) {
   const root = d3.hierarchy(data);
   const treeLayout = d3.tree().size([width - 160, height - 100]);
   treeLayout(root);
+  const g = svg; // g là group đã append('g')
+
+  // Tính bounding box của toàn bộ cây
+  const bounds = root.descendants().reduce(
+    (acc, d) => {
+      return {
+        x0: Math.min(acc.x0, d.x),
+        x1: Math.max(acc.x1, d.x),
+        y0: Math.min(acc.y0, d.y),
+        y1: Math.max(acc.y1, d.y)
+      };
+    },
+    { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity }
+  );
+  
+  const dx = bounds.x1 - bounds.x0;
+  const dy = bounds.y1 - bounds.y0;
+  const scale = Math.min(width / (dx + 160), height / (dy + 100));
+  const translateX = (width - dx * scale) / 2 - bounds.x0 * scale + 80;
+  const translateY = (height - dy * scale) / 2 - bounds.y0 * scale + 40;
+  
+  g.attr("transform", `translate(${translateX},${translateY}) scale(${scale})`);
 
   // Vẽ đường nối
   svg.selectAll('.link')
