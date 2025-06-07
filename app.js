@@ -146,9 +146,9 @@ function drawTree(data) {
   const marginY = 100;
 
   const screenW = window.innerWidth;
-  const scaleX = Math.min(1, screenW*0.8 / (dx + marginX));
-  const translateX = -bounds.x0 * scaleX;
-  const translateY = marginY / 2+10;
+  const scaleX = Math.min(1, screenW*0.9 / (dx + marginX));
+  const translateX = -bounds.x0 * scaleX+20;
+  const translateY = marginY / 2+20;
 
   // Xoá cây cũ
   d3.select("#tree-container").selectAll("svg").remove();
