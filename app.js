@@ -153,14 +153,23 @@ function drawTree(data) {
   );
 
   const dx = bounds.x1 - bounds.x0;
-  const dy = bounds.y1 - bounds.y0;
-  const marginX = 100;
-  const marginY = 100;
+const dy = bounds.y1 - bounds.y0;
+const marginX = 100;
+const marginY = 100;
 
-  const screenW = window.innerWidth;
-  const scaleX = Math.min(1, screenW*0.95 / (dx + marginX));
-  const translateX = -bounds.x0 * scaleX+20;
-  const translateY = marginY / 2+20;
+const screenW = window.innerWidth;
+const screenH = window.innerHeight;
+
+// Scale theo chiều ngang (95% chiều rộng)
+const scaleX = Math.min(1, screenW * 0.95 / (dx + marginX));
+const scaleY = Math.min(1, screenH * 0.95 / (dy + marginY));
+const scale = Math.min(scaleX, scaleY); // Giữ tỷ lệ đều nếu muốn
+
+const totalWidth = dx * scale;
+const totalHeight = dy * scale;
+
+const translateX = (screenW - totalWidth) / 2 - bounds.x0 * scale;
+const translateY = (screenH - totalHeight) / 2 - bounds.y0 * scale;
 
   // Xoá cây cũ
   d3.select("#tree-container").selectAll("svg").remove();
