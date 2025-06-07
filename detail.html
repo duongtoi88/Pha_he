@@ -98,7 +98,7 @@
         return `- Với ${isFemale ? "chồng" : "vợ"}: ${s["Họ và tên"] || "-"}` + "<br>" + childrenList;
       }).join("<br><br>")
     : (allChildren.length
-        ? allChildren.map(c => `+ - ${c["Họ và tên"] || "-"}`).join("<br>")
+        ? allChildren.map(c => `+ ${c["Họ và tên"] || "-"}`).join("<br>")
         : "-");
 
   const html = `
