@@ -96,6 +96,18 @@ function convertToSubTree(rows, rootID, includeGirls = false) {
   }
 
   collectDescendants(rootID);
+// ✅ Nếu tick "Cả Nam & Nữ" → thêm vợ của các thành viên nam
+if (includeGirls) {
+  const extraSpouses = rows.filter(r => {
+    const idChong = String(r["ID chồng"] || "").replace('.0', '');
+    return validIDs.has(idChong); // người chồng đã trong cây
+  });
+
+  extraSpouses.forEach(r => {
+    const id = String(r.ID).replace('.0', '');
+    validIDs.add(id);
+  });
+}
 
   const treePeople = {};
   validIDs.forEach(id => {
