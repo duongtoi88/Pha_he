@@ -99,7 +99,7 @@
       }).join("<br><br>")
     : (allChildren.length
         ? allChildren.map(c => `+ ${c["Họ và tên"] || ""}`).join("<br>")
-        : "-");
+        : "");
 
   const html = `
     <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
