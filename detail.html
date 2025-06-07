@@ -59,47 +59,66 @@
     let allRows = [];
 
     function renderPerson(id) {
-      const person = allRows.find(p => p.ID === id);
-      if (!person) {
-        document.getElementById("info").innerHTML = "Không tìm thấy dữ liệu.";
-        return;
-      }
-      const isFemale = !person["Đinh"] || person["Đinh"] !== "x";
-      let spouse = [];
-      let children = [];
+  const person = allRows.find(p => p.ID === id);
+  if (!person) {
+    document.getElementById("info").innerHTML = "Không tìm thấy dữ liệu.";
+    return;
+  }
 
-      if (isFemale) {
-        const husband = allRows.find(p => String(p.ID).replace('.0', '') === String(person["ID chồng"]).replace('.0', ''));
-        if (husband) spouse.push(husband);
-        children = allRows.filter(c => String(c["ID mẹ"]).replace('.0', '') === id);
-      } else {
-        spouse = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
-        children = allRows.filter(c => String(c["ID cha"]).replace('.0', '') === id);
-      }
+  const isFemale = !person["Đinh"] || person["Đinh"] !== "x";
+  let spouse = [];
+  let allChildren = [];
 
-      children.sort((a, b) => {
-        const ay = parseInt(a["Năm sinh"]) || 9999;
-        const by = parseInt(b["Năm sinh"]) || 9999;
-        return ay - by;
-      });
+  if (isFemale) {
+    const husband = allRows.find(p => String(p.ID).replace('.0', '') === String(person["ID chồng"]).replace('.0', ''));
+    if (husband) spouse.push(husband);
+    allChildren = allRows.filter(c => String(c["ID mẹ"]).replace('.0', '') === id);
+  } else {
+    spouse = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
+    allChildren = allRows.filter(c => String(c["ID cha"]).replace('.0', '') === id);
+  }
 
-      const html = `
-        <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
-        <div class="line">${person["Năm sinh"] || "-"} – ${person["Năm mất"] || "-"}</div>
-        <div class="line"><img src="images/${id}.png" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
-        <div class="line"><b>Vợ/Chồng:</b><br>
-          ${spouse.length ? spouse.map(s => `- ${s["Họ và tên"] || "-"}`).join("<br>") : "-"}
-        </div>
-        <div class="line"><b>Con:</b><br>
-          ${children.length ? children.map(c => `- ${c["Họ và tên"] || "-"}`).join("<br>") : "-"}
-        </div>
-        <div class="line"><b>Thông tin chi tiết:</b><br>${person["Thông tin chi tiết"] || "-"}
-          ${person["Kỵ nhật"] ? `<br><b>Kỵ nhật:</b> ${person["Kỵ nhật"]}` : ""}
-          ${person["Táng"] ? `<br><b>Táng:</b> ${person["Táng"]}` : ""}
-        </div>
-      `;
-      document.getElementById("info").innerHTML = html;
-    }
+  allChildren.sort((a, b) => {
+    const ay = parseInt(a["Năm sinh"]) || 9999;
+    const by = parseInt(b["Năm sinh"]) || 9999;
+    return ay - by;
+  });
+
+  const conTheoTungVoChong = spouse.length
+    ? spouse.map(s => {
+        const sid = String(s.ID).replace('.0', '');
+        const kids = isFemale
+          ? allChildren.filter(c => String(c["ID cha"]).replace('.0', '') === sid)
+          : allChildren.filter(c => String(c["ID mẹ"]).replace('.0', '') === sid);
+
+        const childrenList = kids.length
+          ? kids.map(c => `&nbsp;&nbsp;+ - ${c["Họ và tên"] || "-"}`).join("<br>")
+          : "&nbsp;&nbsp;<i>Không có con</i>";
+
+        return `- Với ${isFemale ? "chồng" : "vợ"}: ${s["Họ và tên"] || "-"}` + "<br>" + childrenList;
+      }).join("<br><br>")
+    : (allChildren.length
+        ? allChildren.map(c => `+ - ${c["Họ và tên"] || "-"}`).join("<br>")
+        : "-");
+
+  const html = `
+    <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
+    <div class="line">${person["Năm sinh"] || "-"} – ${person["Năm mất"] || "-"}</div>
+    <div class="line"><img src="images/${id}.png" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
+    <div class="line"><b>Vợ/Chồng:</b><br>
+      ${spouse.length ? spouse.map(s => `- ${s["Họ và tên"] || "-"}`).join("<br>") : "-"}
+    </div>
+    <div class="line"><b>Con:</b><br>
+      ${conTheoTungVoChong}
+    </div>
+    <div class="line"><b>Thông tin chi tiết:</b><br>${person["Thông tin chi tiết"] || "-"}
+      ${person["Kỵ nhật"] ? `<br><b>Kỵ nhật:</b> ${person["Kỵ nhật"]}` : ""}
+      ${person["Táng"] ? `<br><b>Táng:</b> ${person["Táng"]}` : ""}
+    </div>
+  `;
+
+  document.getElementById("info").innerHTML = html;
+}
 
     fetch('input.xlsx')
       .then(res => res.arrayBuffer())
