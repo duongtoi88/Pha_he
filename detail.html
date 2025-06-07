@@ -92,7 +92,7 @@
           : allChildren.filter(c => String(c["ID mẹ"]).replace('.0', '') === sid);
 
         const childrenList = kids.length
-          ? kids.map(c => `&nbsp;&nbsp;+ - ${c["Họ và tên"] || "-"}`).join("<br>")
+          ? kids.map(c => `&nbsp;&nbsp;+ ${String(c["Họ và tên"] || "").replace(/^[-–+]+\s*/, "")}`).join("<br>")
           : "&nbsp;&nbsp;<i>Không có con</i>";
 
         return `- Với ${isFemale ? "chồng" : "vợ"}: ${s["Họ và tên"] || "-"}` + "<br>" + childrenList;
