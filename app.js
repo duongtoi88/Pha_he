@@ -108,77 +108,52 @@ Object.values(treePeople).forEach(p => {
 function drawTree(data) {
   const root = d3.hierarchy(data);
 
-  // Tự động giãn chiều rộng theo số lá
+  // Tự động giãn chiều rộng theo số node lá
   const numLeaves = root.leaves().length;
   const nodeWidth = 120;
   const minWidth = 1600;
   const width = Math.max(minWidth, numLeaves * nodeWidth);
 
-  // Tính số đời (depth) lớn nhất
   const maxDepth = d3.max(root.descendants(), d => d.depth);
-  const nodeHeight = 200; // khoảng cách giữa các đời
-
-  // Tính chiều cao theo số đời
+  const nodeHeight = 200;
   const height = (maxDepth + 1) * nodeHeight;
 
   const svg = d3.select('#tree-container').append('svg')
     .attr('width', width)
-    .attr('height', height+100)
-    .append('g')
-    .attr('transform', 'translate(80,40)');
+    .attr('height', height + 100);
+
+  const g = svg.append('g');
 
   // Thiết lập layout cây
-  const treeLayout = d3.tree().size([width - 160, height - 100]); // trừ padding trên/dưới
+  const treeLayout = d3.tree().size([width - 160, height - 100]);
   treeLayout(root);
-  const g = svg; // g là group đã append('g')
 
-  // Tính bounding box của toàn bộ cây
-  const bounds = root.descendants().reduce(
-    (acc, d) => {
-      return {
-        x0: Math.min(acc.x0, d.x),
-        x1: Math.max(acc.x1, d.x),
-        y0: Math.min(acc.y0, d.y),
-        y1: Math.max(acc.y1, d.y)
-      };
-    },
-    { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity }
-  );
-  
-  const dx = bounds.x1 - bounds.x0;
-  const dy = bounds.y1 - bounds.y0;
-  const scale = Math.min(width / (dx + 160), height / (dy + 100));
-  const translateX = (width - dx * scale) / 2 - bounds.x0 * scale + 80;
-  const translateY = (height - dy * scale) / 2 - bounds.y0 * scale + 40;
-  
-  g.attr("transform", `translate(${translateX},${translateY}) scale(${scale})`);
+  // 👉 Căn node gốc giữa màn hình (ngang)
+  const centerX = window.innerWidth / 2;
+  const translateX = centerX - root.x;
+  const translateY = 40;
+  g.attr("transform", `translate(${translateX},${translateY})`);
 
-  // Vẽ đường nối
+  // Vẽ các nhánh
   svg.selectAll('.link')
-  .data(root.links())
-  .enter()
-  .append('path')
-  .attr('class', 'link')
-  .attr('fill', 'none')
-  .attr('stroke', '#555')
-  .attr('stroke-width', 2)
-  .attr('d', d => {
-    const x1 = d.source.x;
-    const y1 = d.source.y;
-    const x2 = d.target.x;
-    const y2 = d.target.y;
-    const midY = (y1 + y2) / 2;
+    .data(root.links())
+    .enter()
+    .append('path')
+    .attr('class', 'link')
+    .attr('fill', 'none')
+    .attr('stroke', '#555')
+    .attr('stroke-width', 2)
+    .attr('d', d => {
+      const x1 = d.source.x;
+      const y1 = d.source.y;
+      const x2 = d.target.x;
+      const y2 = d.target.y;
+      const midY = (y1 + y2) / 2;
+      return `M ${x1},${y1} V ${midY} H ${x2} V ${y2}`;
+    });
 
-    return `
-      M ${x1},${y1}
-      V ${midY}
-      H ${x2}
-      V ${y2}
-    `;
-  });
-
-  // Tạo node
-  const node = svg.selectAll('.node')
+  // Vẽ các node
+  const node = g.selectAll('.node')
     .data(root.descendants())
     .enter()
     .append('g')
@@ -188,7 +163,6 @@ function drawTree(data) {
     .on('mouseover', (event, d) => showQuickTooltip(event, d.data))
     .on('mouseout', () => document.getElementById('tooltip').style.display = 'none');
 
-  // Màu sắc phân biệt theo Đinh
   node.append('rect')
     .attr('x', -40)
     .attr('y', -60)
@@ -198,22 +172,21 @@ function drawTree(data) {
     .attr('ry', 10)
     .attr('class', d => d.data.dinh === 'x' ? 'dinh-x' : 'dinh-thuong');
 
-  // Họ tên
   node.append('text')
     .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(10, 0) rotate(0)')
+    .attr('transform', 'translate(10, 0)')
     .style('font-size', '12px')
     .attr('fill', 'black')
     .text(d => d.data.name);
 
-  // Năm sinh - năm mất
   node.append('text')
     .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(-10, 0) rotate(0)')
+    .attr('transform', 'translate(-10, 0)')
     .style('font-size', '12px')
     .attr('fill', 'black')
     .text(d => (d.data.birth || '') + ' - ' + (d.data.death || ''));
 }
+
 // Tooltip ngắn khi hover
 function showQuickTooltip(event, data) {
   const wives = window.rawRows.filter(r => {
