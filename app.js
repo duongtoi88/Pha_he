@@ -106,7 +106,13 @@ Object.values(treePeople).forEach(p => {
 
 // Vẽ cây phả hệ bằng D3.js
 function drawTree(data) {
-  const width = 1600;
+  const root = d3.hierarchy(data);
+
+  // Tự động giãn chiều rộng theo số lá
+  const numLeaves = root.leaves().length;
+  const nodeWidth = 120;
+  const minWidth = 1600;
+  const width = Math.max(minWidth, numLeaves * nodeWidth);
 
   // Tính số đời (depth) lớn nhất
   const root = d3.hierarchy(data);
