@@ -9,9 +9,8 @@ window.onload = () => {
 
       window.rawRows = json;
 
-      // Lọc các ID gốc (Đinh = "x")
+      // Tạo dropdown chọn ID gốc (Đinh x)
       const rootIDs = json.filter(r => r.Đinh === "x").map(r => String(r.ID).replace('.0', ''));
-
       const select = document.createElement("select");
       select.id = "rootSelector";
       select.style.marginBottom = "10px";
@@ -24,18 +23,30 @@ window.onload = () => {
         select.appendChild(opt);
       });
 
+      // Thêm sự kiện chọn ID
       select.onchange = () => {
         const selectedID = select.value;
-        const rootTree = convertToSubTree(json, selectedID);
+        const includeGirls = document.getElementById("showGirls").checked;
+        const rootTree = convertToSubTree(json, selectedID, includeGirls);
         document.getElementById("tree-container").innerHTML = "";
         drawTree(rootTree);
       };
 
+      // Thêm vào DOM
       document.body.insertBefore(select, document.getElementById("tree-container"));
 
-      // Load cây ban đầu
+      // Sự kiện tick "Cả Nam & Nữ"
+      document.getElementById("showGirls").onchange = () => {
+        const selectedID = document.getElementById("rootSelector").value;
+        const includeGirls = document.getElementById("showGirls").checked;
+        const rootTree = convertToSubTree(json, selectedID, includeGirls);
+        document.getElementById("tree-container").innerHTML = "";
+        drawTree(rootTree);
+      };
+
+      // Vẽ cây mặc định
       const defaultRoot = rootIDs[0];
-      const treeData = convertToSubTree(json, defaultRoot);
+      const treeData = convertToSubTree(json, defaultRoot, false);
       drawTree(treeData);
     })
     .catch(err => {
@@ -44,7 +55,7 @@ window.onload = () => {
 };
 
 // Duyệt cây con từ ID gốc
-function convertToSubTree(rows, rootID) {
+function convertToSubTree(rows, rootID, includeGirls = false) {
   const people = {};
   const validIDs = new Set();
 
@@ -65,41 +76,45 @@ function convertToSubTree(rows, rootID) {
     };
   });
 
-  // Duyệt theo con cháu của ID gốc
   function collectDescendants(id) {
-    validIDs.add(id);
+    if (!people[id]) return;
+
+    if (includeGirls || people[id].dinh === "x") {
+      validIDs.add(id);
+    }
+
     rows.forEach(r => {
       const childID = String(r.ID).replace('.0', '');
       const fatherID = r["ID cha"] ? String(r["ID cha"]).replace('.0', '') : null;
+
       if (fatherID === id) {
-        collectDescendants(childID);
+        if (includeGirls || r["Đinh"] === "x") {
+          collectDescendants(childID);
+        }
       }
     });
   }
 
   collectDescendants(rootID);
 
-  // Chỉ lấy những người thuộc cây con
   const treePeople = {};
   validIDs.forEach(id => {
     if (people[id]) treePeople[id] = people[id];
   });
 
-  // Gán con cho cha
-Object.values(treePeople).forEach(p => {
-  if (p.father && treePeople[p.father]) {
-    treePeople[p.father].children.push(p);
-  }
-});
-
-// 🔽 Sắp xếp con theo năm sinh tăng dần
-Object.values(treePeople).forEach(p => {
-  p.children.sort((a, b) => {
-    const aYear = parseInt(a.birth) || 9999;
-    const bYear = parseInt(b.birth) || 9999;
-    return aYear - bYear;
+  Object.values(treePeople).forEach(p => {
+    if (p.father && treePeople[p.father]) {
+      treePeople[p.father].children.push(p);
+    }
   });
-});
+
+  Object.values(treePeople).forEach(p => {
+    p.children.sort((a, b) => {
+      const aYear = parseInt(a.birth) || 9999;
+      const bYear = parseInt(b.birth) || 9999;
+      return aYear - bYear;
+    });
+  });
 
   return treePeople[rootID];
 }
@@ -108,42 +123,54 @@ Object.values(treePeople).forEach(p => {
 function drawTree(data) {
   const root = d3.hierarchy(data);
 
-  // Tự động giãn chiều rộng theo số node lá
-  const numLeaves = root.leaves().length;
+  // Thiết lập layout dạng cây
   const nodeWidth = 120;
-  const minWidth = 1600;
-  const width = Math.max(minWidth, numLeaves * nodeWidth);
-
-  const maxDepth = d3.max(root.descendants(), d => d.depth);
   const nodeHeight = 200;
-  const height = (maxDepth + 1) * nodeHeight;
-
-  const svg = d3.select('#tree-container').append('svg')
-    .attr('width', width)
-    .attr('height', height + 100);
-
-  const g = svg.append('g');
-
-  // Thiết lập layout cây
-  const treeLayout = d3.tree().size([width - 160, height - 100]);
+  const treeLayout = d3.tree().nodeSize([nodeWidth, nodeHeight]);
   treeLayout(root);
 
-  // 👉 Căn node gốc giữa màn hình (ngang)
-  const centerX = window.innerWidth / 2;
-  const translateX = centerX - root.x;
-  const translateY = 40;
-  g.attr("transform", `translate(${translateX},${translateY})`);
+  // Tính bounding box thực tế
+  const bounds = root.descendants().reduce(
+    (acc, d) => ({
+      x0: Math.min(acc.x0, d.x),
+      x1: Math.max(acc.x1, d.x),
+      y0: Math.min(acc.y0, d.y),
+      y1: Math.max(acc.y1, d.y)
+    }),
+    { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity }
+  );
 
-  // Vẽ các nhánh
-  svg.selectAll('.link')
+  const dx = bounds.x1 - bounds.x0;
+  const dy = bounds.y1 - bounds.y0;
+  const marginX = 100;
+  const marginY = 100;
+
+  const screenW = window.innerWidth;
+  const scaleX = Math.min(1, screenW / (dx + marginX));
+  const translateX = -bounds.x0 * scaleX + marginX / 2;
+  const translateY = marginY / 2;
+
+  // Xoá cây cũ
+  d3.select("#tree-container").selectAll("svg").remove();
+
+  // Tạo SVG mới
+  const svg = d3.select("#tree-container").append("svg")
+    .attr("width", screenW)
+    .attr("height", dy + marginY + 300);
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${translateX}, ${translateY}) scale(${scaleX})`);
+
+  // Vẽ đường nối
+  g.selectAll(".link")
     .data(root.links())
     .enter()
-    .append('path')
-    .attr('class', 'link')
-    .attr('fill', 'none')
-    .attr('stroke', '#555')
-    .attr('stroke-width', 2)
-    .attr('d', d => {
+    .append("path")
+    .attr("class", "link")
+    .attr("fill", "none")
+    .attr("stroke", "#555")
+    .attr("stroke-width", 2)
+    .attr("d", d => {
       const x1 = d.source.x;
       const y1 = d.source.y;
       const x2 = d.target.x;
@@ -153,38 +180,38 @@ function drawTree(data) {
     });
 
   // Vẽ các node
-  const node = g.selectAll('.node')
+  const node = g.selectAll(".node")
     .data(root.descendants())
     .enter()
-    .append('g')
-    .attr('class', 'node')
-    .attr('transform', d => `translate(${d.x},${d.y})`)
-    .on('click', (event, d) => openDetailTab(d.data.id))
-    .on('mouseover', (event, d) => showQuickTooltip(event, d.data))
-    .on('mouseout', () => document.getElementById('tooltip').style.display = 'none');
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d.x},${d.y})`)
+    .on("click", (event, d) => openDetailTab(d.data.id))
+    .on("mouseover", (event, d) => showQuickTooltip(event, d.data))
+    .on("mouseout", () => document.getElementById("tooltip").style.display = "none");
 
-  node.append('rect')
-    .attr('x', -40)
-    .attr('y', -60)
-    .attr('width', 80)
-    .attr('height', 120)
-    .attr('rx', 10)
-    .attr('ry', 10)
-    .attr('class', d => d.data.dinh === 'x' ? 'dinh-x' : 'dinh-thuong');
+  node.append("rect")
+    .attr("x", -40)
+    .attr("y", -60)
+    .attr("width", 80)
+    .attr("height", 120)
+    .attr("rx", 10)
+    .attr("ry", 10)
+    .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
 
-  node.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(10, 0)')
-    .style('font-size', '12px')
-    .attr('fill', 'black')
+  node.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "translate(10, 0)")
+    .style("font-size", "12px")
+    .attr("fill", "black")
     .text(d => d.data.name);
 
-  node.append('text')
-    .attr('text-anchor', 'middle')
-    .attr('transform', 'translate(-10, 0)')
-    .style('font-size', '12px')
-    .attr('fill', 'black')
-    .text(d => (d.data.birth || '') + ' - ' + (d.data.death || ''));
+  node.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "translate(-10, 0)")
+    .style("font-size", "12px")
+    .attr("fill", "black")
+    .text(d => (d.data.birth || "") + " - " + (d.data.death || ""));
 }
 
 // Tooltip ngắn khi hover
