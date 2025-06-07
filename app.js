@@ -147,9 +147,9 @@ function drawTree(data) {
   
   const dx = bounds.x1 - bounds.x0;
   const dy = bounds.y1 - bounds.y0;
-  const scale = Math.min(width / (dx + 160), height / (dy + 100));
-  const translateX = (width - dx * scale) / 2 - bounds.x0 * scale + 80;
-  const translateY = (height - dy * scale) / 2 - bounds.y0 * scale + 40;
+  const scale = 1; // không scale nhỏ lại nữa
+  const translateX = width / 2 - root.x;
+  const translateY = 40; // giữ nguyên khoảng cách trên
   
   g.attr("transform", `translate(${translateX},${translateY}) scale(${scale})`);
 
