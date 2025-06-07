@@ -147,9 +147,11 @@ function drawTree(data) {
   
   const dx = bounds.x1 - bounds.x0;
   const dy = bounds.y1 - bounds.y0;
-  const scale = 1; // không scale nhỏ lại nữa
-  const translateX = width / 2 - root.x;
-  const translateY = 40; // giữ nguyên khoảng cách trên
+  // Căn node gốc ra giữa màn hình
+  const rootNode = root; // node gốc
+  const centerX = window.innerWidth / 2;
+  const translateX = centerX - rootNode.x;
+  const translateY = 40;
   
   g.attr("transform", `translate(${translateX},${translateY}) scale(${scale})`);
 
