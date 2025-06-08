@@ -156,7 +156,8 @@ function drawTree(data) {
 const dy = bounds.y1 - bounds.y0;
 const marginX = 100;
 const marginY = 100;
-
+const screenW = window.innerWidth;
+const screenH = window.innerHeight;
 const translateX = 40 - bounds.x0;
 const translateY = 80 - bounds.y0;
 
