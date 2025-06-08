@@ -222,22 +222,6 @@ const totalWidth = dx + marginX * 2; // rộng thực sự của cây
     .style("font-size", "12px")
     .attr("fill", "black")
     .text(d => (d.data.birth || "") + " - " + (d.data.death || ""));
-
-  // Cuộn cây sao cho node gốc ra giữa màn hình
-    setTimeout(() => {
-    const container = document.getElementById("tree-container");
-    const svg = container.querySelector("svg");
-    if (!svg) return;
-  
-    const rootNode = d3.select(".node").datum();  // node đầu tiên là gốc
-    const gTransform = d3.select("g").attr("transform");
-    const parts = gTransform.replace("translate(", "").replace(")", "").split(",");
-    const translateX = parseFloat(parts[0]) || 0;
-  
-    const centerX = rootNode.x + translateX;
-    const scrollX = centerX - container.clientWidth / 2;
-    container.scrollLeft = scrollX;
-  }, 50);
 }
 
 // Tooltip ngắn khi hover
