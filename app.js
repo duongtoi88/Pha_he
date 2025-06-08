@@ -169,7 +169,7 @@ const totalWidth = dx * scale;
 const totalHeight = dy * scale;
 
 const translateX = (screenW - totalWidth) / 2 - bounds.x0 * scale;
-const translateY = 40 - bounds.y0 * scale;
+const translateY = 80 - bounds.y0 * scale;
 
   // Xoá cây cũ
   d3.select("#tree-container").selectAll("svg").remove();
