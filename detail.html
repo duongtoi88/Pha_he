@@ -136,7 +136,7 @@
         allRows.forEach(p => {
           const opt = document.createElement("option");
           opt.value = p.ID;
-          opt.text = `${p["Họ và tên"] || "(Không tên)"} – ${p.ID}`;
+          opt.text = `${p["Họ và tên"] || "(Không tên)"} (Đời ${p["Đời"] || "-"}) – ${p.ID}`;
           select.appendChild(opt);
         });
 
