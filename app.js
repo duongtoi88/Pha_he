@@ -19,7 +19,7 @@ window.onload = () => {
         const r = json.find(p => String(p.ID).replace('.0', '') === id);
         const opt = document.createElement("option");
         opt.value = id;
-        opt.text = `${r["Họ và tên"]} (${id})`;
+        opt.text = `${r["Họ và tên"]} (Đời ${r["Đời"] || "-"})`;
         select.appendChild(opt);
       });
 
