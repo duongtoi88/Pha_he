@@ -2,27 +2,29 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Xuất SVG & PDF toàn bộ cây phả hệ</title>
+  <title>Xuất Sơ đồ Phả hệ (In chất lượng cao)</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body { font-family: Arial; margin: 20px; }
     #tree-container {
       border: 1px solid #ccc;
+      overflow-x: auto;
+      overflow-y: auto;
+      white-space: nowrap;
+      height: 100vh;
+    }
+    svg {
       background: white;
-      overflow: auto;
     }
     .node rect {
       rx: 10;
       ry: 10;
     }
     .node text {
-      font-size: 36px;
+      font-size: 12px;
       writing-mode: vertical-rl;
-      text-orientation: upright;
-      text-anchor: middle;
-      dominant-baseline: middle;
+      text-orientation: mixed;
     }
     .btn-export {
       background: #007bff;
@@ -30,16 +32,16 @@
       padding: 10px 20px;
       border: none;
       border-radius: 4px;
-      margin: 5px;
+      margin-bottom: 10px;
       cursor: pointer;
     }
-    .dinh-x {
+      .dinh-x {
       fill: #c3e6cb;
       stroke: #155724;
     }
     .dinh-thuong {
-      fill: #fff3cd;
-      stroke: #856404;
+      fill: #ffffff;
+      stroke: #0c5460;
     }
   </style>
 </head>
@@ -49,14 +51,11 @@
     <select id="rootSelector"></select>
     <label style="margin-left:20px;"><input type="checkbox" id="showGirls" style="margin-right:6px;">Cả Nam & Nữ</label>
     <button class="btn-export" onclick="downloadSVG()">⬇ Tải SVG</button>
-    <button class="btn-export" onclick="downloadPDF()">⬇ Tải PDF toàn bộ cây</button>
   </div>
-  <div id="tree-container"></div>
 
+  <div id="tree-container"></div>
   <script>
     let allRows = [];
-    let currentWidth = 3000;
-    let currentHeight = 2000;
 
     function convertToSubTree(rows, rootID, includeGirls = false) {
       const people = {};
@@ -81,30 +80,55 @@
 
       function collectDescendants(id) {
         if (!people[id]) return;
-        if (includeGirls || people[id].dinh === "x") validIDs.add(id);
+
+        if (includeGirls || people[id].dinh === "x") {
+          validIDs.add(id);
+        }
+
         rows.forEach(r => {
           const childID = String(r.ID).replace('.0', '');
           const fatherID = r["ID cha"] ? String(r["ID cha"]).replace('.0', '') : null;
-          if (fatherID === id && (includeGirls || r["Đinh"] === "x")) {
-            collectDescendants(childID);
+
+          if (fatherID === id) {
+            if (includeGirls || r["Đinh"] === "x") {
+              collectDescendants(childID);
+            }
           }
         });
       }
 
       collectDescendants(rootID);
+
       if (includeGirls) {
-        rows.filter(r => validIDs.has(String(r["ID chồng"] || "").replace('.0', '')))
-             .forEach(r => validIDs.add(String(r.ID).replace('.0', '')));
+        const extraSpouses = rows.filter(r => {
+          const idChong = String(r["ID chồng"] || "").replace('.0', '');
+          return validIDs.has(idChong);
+        });
+        extraSpouses.forEach(r => {
+          const id = String(r.ID).replace('.0', '');
+          validIDs.add(id);
+        });
       }
 
       const treePeople = {};
-      validIDs.forEach(id => { if (people[id]) treePeople[id] = people[id]; });
-      Object.values(treePeople).forEach(p => {
-        if (p.father && treePeople[p.father]) treePeople[p.father].children.push(p);
+      validIDs.forEach(id => {
+        if (people[id]) treePeople[id] = people[id];
       });
+
       Object.values(treePeople).forEach(p => {
-        p.children.sort((a, b) => (parseInt(a.birth) || 9999) - (parseInt(b.birth) || 9999));
+        if (p.father && treePeople[p.father]) {
+          treePeople[p.father].children.push(p);
+        }
       });
+
+      Object.values(treePeople).forEach(p => {
+        p.children.sort((a, b) => {
+          const aYear = parseInt(a.birth) || 9999;
+          const bYear = parseInt(b.birth) || 9999;
+          return aYear - bYear;
+        });
+      });
+
       return treePeople[rootID];
     }
 
@@ -126,15 +150,14 @@
       const dy = bounds.y1 - bounds.y0;
       const marginX = 100;
       const marginY = 100;
-      currentWidth = dx + marginX * 2;
-      currentHeight = dy + marginY + 300;
+      const totalWidth = dx + marginX * 2;
+      const totalHeight = dy + marginY + 300;
 
       d3.select("#tree-container").selectAll("svg").remove();
 
       const svg = d3.select("#tree-container").append("svg")
-        .attr("xmlns", "http://www.w3.org/2000/svg")
-        .attr("width", currentWidth)
-        .attr("height", currentHeight)
+        .attr("width", totalWidth)
+        .attr("height", totalHeight)
         .attr("id", "treeSVG")
         .append("g")
         .attr("transform", `translate(${marginX - bounds.x0}, ${marginY - bounds.y0})`);
@@ -143,10 +166,18 @@
         .data(root.links())
         .enter()
         .append("path")
+        .attr("class", "link")
         .attr("fill", "none")
         .attr("stroke", "#555")
-        .attr("stroke-width", 6)
-        .attr("d", d => `M${d.source.x},${d.source.y} V${(d.source.y + d.target.y)/2} H${d.target.x} V${d.target.y}`);
+        .attr("stroke-width", 2)
+        .attr("d", d => {
+          const x1 = d.source.x;
+          const y1 = d.source.y;
+          const x2 = d.target.x;
+          const y2 = d.target.y;
+          const midY = (y1 + y2) / 2;
+          return `M ${x1},${y1} V ${midY} H ${x2} V ${y2}`;
+        });
 
       const node = svg.selectAll(".node")
         .data(root.descendants())
@@ -155,43 +186,31 @@
         .attr("class", "node")
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
-      node.append("rect")
-        .attr("x", -40).attr("y", -60)
-        .attr("width", 240).attr("height", 360)
-        .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
-
-      node.append("text")
-        .attr("x", 0).attr("y", 0)
-        .text(d => d.data.name);
-    }
-
-    function downloadPDF() {
-      const element = document.getElementById("tree-container");
-      const opt = {
-        margin: 0,
-        filename: 'so_do_pha_he_full.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 4 },
-        jsPDF: {
-          unit: 'px',
-          format: [currentWidth, currentHeight],
-          orientation: 'landscape'
-        }
-      };
-      html2pdf().set(opt).from(element).save();
+        node.append("rect")
+          .attr("x", -40).attr("y", -60)
+          .attr("width", 60).attr("height", 120)
+          .attr("fill", d => d.data.dinh === "x" ? "#c3e6cb" : "#ffffff")
+          .attr("stroke", d => d.data.dinh === "x" ? "#155724" : "#0c5460");
+        
+        node.append("text")
+          .attr("text-anchor", "middle")
+          .attr("transform", "rotate(0)")
+          .attr("x", 0)
+          .attr("y", 0)
+          .text(d => d.data.name);
     }
 
     function downloadSVG() {
-      const svg = document.querySelector("svg");
+      const svg = document.getElementById("treeSVG").parentNode;
       const svgData = new XMLSerializer().serializeToString(svg);
-      const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
-      const svgUrl = URL.createObjectURL(svgBlob);
-      const downloadLink = document.createElement("a");
-      downloadLink.href = svgUrl;
-      downloadLink.download = "so_do_pha_he.svg";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      const blob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "so_do_pha_he.svg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     fetch('input.xlsx')
