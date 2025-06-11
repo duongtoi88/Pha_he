@@ -145,7 +145,7 @@
         .append("path")
         .attr("fill", "none")
         .attr("stroke", "#555")
-        .attr("stroke-width", 2)
+        .attr("stroke-width", 6)
         .attr("d", d => `M${d.source.x},${d.source.y} V${(d.source.y + d.target.y)/2} H${d.target.x} V${d.target.y}`);
 
       const node = svg.selectAll(".node")
@@ -157,7 +157,7 @@
 
       node.append("rect")
         .attr("x", -40).attr("y", -60)
-        .attr("width", 80).attr("height", 120)
+        .attr("width", 240).attr("height", 360)
         .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
 
       node.append("text")
