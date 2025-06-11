@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Xuất PDF Sơ đồ Phả hệ</title>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    #tree-container {
+      border: 1px solid #ccc;
+      background: white;
+    }
+    .node rect {
+      rx: 10;
+      ry: 10;
+    }
+    .node text {
+      font-size: 12px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    .btn-export {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .dinh-x {
+      fill: #c3e6cb;
+      stroke: #155724;
+    }
+    .dinh-thuong {
+      fill: #ffffff;
+      stroke: #0c5460;
+    }
+  </style>
+</head>
+<body>
+  <div style="margin-bottom: 10px;">
+    <label for="rootSelector"><b>Chọn ID gốc:</b></label>
+    <select id="rootSelector"></select>
+    <label style="margin-left:20px;"><input type="checkbox" id="showGirls" style="margin-right:6px;">Cả Nam & Nữ</label>
+    <button class="btn-export" onclick="downloadPDF()">⬇ Tải PDF</button>
+  </div>
+  <div id="tree-container"></div>
+
+  <script>
+    let allRows = [];
+
+    function convertToSubTree(rows, rootID, includeGirls = false) {
+      const people = {};
+      const validIDs = new Set();
+
+      rows.forEach(row => {
+        const id = String(row.ID).replace('.0', '');
+        people[id] = {
+          id,
+          name: row["Họ và tên"] || "",
+          birth: row["Năm sinh"] || "",
+          death: row["Năm mất"] || "",
+          info: row["Thông tin chi tiết"] || "",
+          father: row["ID cha"] ? String(row["ID cha"]).replace('.0', '') : null,
+          mother: row["ID mẹ"] ? String(row["ID mẹ"]).replace('.0', '') : null,
+          spouse: row["ID chồng"] ? String(row["ID chồng"]).replace('.0', '') : null,
+          doi: row["Đời"] || "",
+          dinh: row["Đinh"] || "",
+          children: []
+        };
+      });
+
+      function collectDescendants(id) {
+        if (!people[id]) return;
+
+        if (includeGirls || people[id].dinh === "x") {
+          validIDs.add(id);
+        }
+
+        rows.forEach(r => {
+          const childID = String(r.ID).replace('.0', '');
+          const fatherID = r["ID cha"] ? String(r["ID cha"]).replace('.0', '') : null;
+
+          if (fatherID === id) {
+            if (includeGirls || r["Đinh"] === "x") {
+              collectDescendants(childID);
+            }
+          }
+        });
+      }
+
+      collectDescendants(rootID);
+
+      if (includeGirls) {
+        const extraSpouses = rows.filter(r => {
+          const idChong = String(r["ID chồng"] || "").replace('.0', '');
+          return validIDs.has(idChong);
+        });
+        extraSpouses.forEach(r => {
+          const id = String(r.ID).replace('.0', '');
+          validIDs.add(id);
+        });
+      }
+
+      const treePeople = {};
+      validIDs.forEach(id => {
+        if (people[id]) treePeople[id] = people[id];
+      });
+
+      Object.values(treePeople).forEach(p => {
+        if (p.father && treePeople[p.father]) {
+          treePeople[p.father].children.push(p);
+        }
+      });
+
+      Object.values(treePeople).forEach(p => {
+        p.children.sort((a, b) => {
+          const aYear = parseInt(a.birth) || 9999;
+          const bYear = parseInt(b.birth) || 9999;
+          return aYear - bYear;
+        });
+      });
+
+      return treePeople[rootID];
+    }
+
+    function drawTree(data) {
+      const root = d3.hierarchy(data);
+      const nodeWidth = 120;
+      const nodeHeight = 200;
+      const treeLayout = d3.tree().nodeSize([nodeWidth, nodeHeight]);
+      treeLayout(root);
+
+      const bounds = root.descendants().reduce((acc, d) => ({
+        x0: Math.min(acc.x0, d.x),
+        x1: Math.max(acc.x1, d.x),
+        y0: Math.min(acc.y0, d.y),
+        y1: Math.max(acc.y1, d.y)
+      }), { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity });
+
+      const dx = bounds.x1 - bounds.x0;
+      const dy = bounds.y1 - bounds.y0;
+      const marginX = 100;
+      const marginY = 100;
+      const totalWidth = dx + marginX * 2;
+      const totalHeight = dy + marginY + 300;
+
+      d3.select("#tree-container").selectAll("svg").remove();
+
+      const svg = d3.select("#tree-container").append("svg")
+        .attr("width", totalWidth)
+        .attr("height", totalHeight)
+        .attr("id", "treeSVG")
+        .append("g")
+        .attr("transform", `translate(${marginX - bounds.x0}, ${marginY - bounds.y0})`);
+
+      svg.selectAll(".link")
+        .data(root.links())
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr("fill", "none")
+        .attr("stroke", "#555")
+        .attr("stroke-width", 2)
+        .attr("d", d => {
+          const x1 = d.source.x;
+          const y1 = d.source.y;
+          const x2 = d.target.x;
+          const y2 = d.target.y;
+          const midY = (y1 + y2) / 2;
+          return `M ${x1},${y1} V ${midY} H ${x2} V ${y2}`;
+        });
+
+      const node = svg.selectAll(".node")
+        .data(root.descendants())
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      node.append("rect")
+        .attr("x", -40).attr("y", -60)
+        .attr("width", 60).attr("height", 120)
+        .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
+
+      node.append("text")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(0)")
+        .attr("x", 0)
+        .attr("y", 0)
+        .text(d => d.data.name);
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById("tree-container");
+      const opt = {
+        margin: 0,
+        filename: 'so_do_pha_he.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'px', format: 'a0', orientation: 'landscape' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    fetch('input.xlsx')
+      .then(res => res.arrayBuffer())
+      .then(data => {
+        const wb = XLSX.read(data, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+
+        allRows = json;
+        const rootIDs = json.filter(r => r.Đinh === "x").map(r => String(r.ID).replace('.0', ''));
+        const select = document.getElementById("rootSelector");
+
+        rootIDs.forEach(id => {
+          const r = json.find(p => String(p.ID).replace('.0', '') === id);
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.text = `${r["Họ và tên"]} (Đời ${r["Đời"] || "-"})`;
+          select.appendChild(opt);
+        });
+
+        select.onchange = () => {
+          const selectedID = select.value;
+          const includeGirls = document.getElementById("showGirls").checked;
+          const tree = convertToSubTree(json, selectedID, includeGirls);
+          drawTree(tree);
+        };
+
+        document.getElementById("showGirls").onchange = () => {
+          const selectedID = select.value;
+          const includeGirls = document.getElementById("showGirls").checked;
+          const tree = convertToSubTree(json, selectedID, includeGirls);
+          drawTree(tree);
+        };
+
+        const defaultRoot = rootIDs[0];
+        const tree = convertToSubTree(json, defaultRoot, false);
+        drawTree(tree);
+      });
+  </script>
+</body>
+</html>
