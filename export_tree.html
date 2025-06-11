@@ -162,7 +162,6 @@
         .attr("height", totalHeight)
         .attr("id", "treeSVG")
         .append("g")
-        .attr("class", "node")
         .attr("transform", `translate(${marginX - bounds.x0}, ${marginY - bounds.y0})`);
 
       svg.selectAll(".link")
@@ -197,8 +196,8 @@
         node.append("text")
           .attr("text-anchor", "middle")
           .attr("transform", "rotate(0)")
-          .attr("x", 65)
-          .attr("y", -15)
+          .attr("x", 0)
+          .attr("y", 0)
           .text(d => d.data.name);
     }
 
