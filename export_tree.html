@@ -37,6 +37,14 @@
       margin-bottom: 10px;
       cursor: pointer;
     }
+      .dinh-x {
+      fill: #c3e6cb;
+      stroke: #155724;
+    }
+    .dinh-thuong {
+      fill: #ffffff;
+      stroke: #0c5460;
+    }
   </style>
 </head>
 <body>
@@ -180,15 +188,17 @@
         .attr("class", "node")
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
-      node.append("rect")
-        .attr("x", -40).attr("y", -60)
-        .attr("width", 80).attr("height", 120);
-
-      node.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(90)")
-        .attr("y", 0)
-        .text(d => d.data.name);
+        node.append("rect")
+          .attr("x", -40).attr("y", -60)
+          .attr("width", 60).attr("height", 120)
+          .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
+        
+        node.append("text")
+          .attr("text-anchor", "middle")
+          .attr("transform", "rotate(90)")
+          .attr("x", 60)
+          .attr("y", -20)
+          .text(d => d.data.name);
     }
 
     function downloadSVG() {
