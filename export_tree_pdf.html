@@ -11,15 +11,18 @@
     #tree-container {
       border: 1px solid #ccc;
       background: white;
+      overflow: auto;
     }
     .node rect {
       rx: 10;
       ry: 10;
     }
     .node text {
-      font-size: 12px;
+      font-size: 36px;
       writing-mode: vertical-rl;
-      text-orientation: mixed;
+      text-orientation: upright;
+      text-anchor: middle;
+      dominant-baseline: middle;
     }
     .btn-export {
       background: #007bff;
@@ -35,8 +38,8 @@
       stroke: #155724;
     }
     .dinh-thuong {
-      fill: #ffffff;
-      stroke: #0c5460;
+      fill: #fff3cd;
+      stroke: #856404;
     }
   </style>
 </head>
@@ -154,7 +157,7 @@
 
       node.append("rect")
         .attr("x", -40).attr("y", -60)
-        .attr("width", 60).attr("height", 120)
+        .attr("width", 80).attr("height", 120)
         .attr("class", d => d.data.dinh === "x" ? "dinh-x" : "dinh-thuong");
 
       node.append("text")
@@ -168,7 +171,7 @@
         margin: 0,
         filename: 'so_do_pha_he_full.pdf',
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2 },
+        html2canvas: { scale: 4 },
         jsPDF: {
           unit: 'px',
           format: [currentWidth, currentHeight],
