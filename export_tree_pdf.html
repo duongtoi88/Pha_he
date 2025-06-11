@@ -35,14 +35,6 @@
       margin-bottom: 10px;
       cursor: pointer;
     }
-      .dinh-x {
-      fill: #c3e6cb;
-      stroke: #155724;
-    }
-    .dinh-thuong {
-      fill: #ffffff;
-      stroke: #0c5460;
-    }
   </style>
 </head>
 <body>
@@ -197,6 +189,10 @@
           .attr("transform", "rotate(0)")
           .attr("x", 0)
           .attr("y", 0)
+          .style("fill", "#000")  // Đảm bảo chữ màu đen
+          .style("font-size", "24px")  // Tăng size chữ để dễ đọc
+          .attr("writing-mode", "vertical-rl")
+          .attr("text-orientation", "mixed")
           .text(d => d.data.name);
     }
 
