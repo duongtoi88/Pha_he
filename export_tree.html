@@ -162,7 +162,7 @@
           const y1 = d.source.y;
           const x2 = d.target.x;
           const y2 = d.target.y;
-          const midY = (y1 + y2) / 2+100;
+          const midY = (y1 + y2) / 2+50;
           return `M ${x1},${y1} V ${midY} H ${x2} V ${y2}`;
         });
 
@@ -174,7 +174,7 @@
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
         node.append("rect")
-          .attr("x", -40).attr("y", 0)
+          .attr("x", -40).attr("y", -30)
           .attr("width", 50).attr("height", 240)
           .attr("fill", d => d.data.dinh === "x" ? "#c3e6cb" : "#ffffff")
           .attr("stroke", d => d.data.dinh === "x" ? "#155724" : "#0c5460");
@@ -183,7 +183,7 @@
           .attr("text-anchor", "middle")
           .attr("transform", "rotate(0)")
           .attr("x", -10)
-          .attr("y", -60)
+          .attr("y", 30)
           .style("fill", "#000")  // Đảm bảo chữ màu đen
           .style("font-size", "24px")  // Tăng size chữ để dễ đọc
           .style("writing-mode", "vertical-rl")
