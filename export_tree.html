@@ -122,7 +122,7 @@
     function drawTree(data) {
       const root = d3.hierarchy(data);
       const nodeWidth = 60;
-      const nodeHeight = 200;
+      const nodeHeight = 300;
       const treeLayout = d3.tree().nodeSize([nodeWidth, nodeHeight]);
       treeLayout(root);
 
