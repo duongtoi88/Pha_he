@@ -174,7 +174,7 @@
         .attr("transform", d => `translate(${d.x},${d.y})`);
 
         node.append("rect")
-          .attr("x", -40).attr("y", -60)
+          .attr("x", -20).attr("y", -60)
           .attr("width", 50).attr("height", 240)
           .attr("fill", d => d.data.dinh === "x" ? "#c3e6cb" : "#ffffff")
           .attr("stroke", d => d.data.dinh === "x" ? "#155724" : "#0c5460");
@@ -182,8 +182,8 @@
         node.append("text")
           .attr("text-anchor", "middle")
           .attr("transform", "rotate(0)")
-          .attr("x", -10)
-          .attr("y", 35)
+          .attr("x", -30)
+          .attr("y", 60)
           .style("fill", "#000")  // Đảm bảo chữ màu đen
           .style("font-size", "24px")  // Tăng size chữ để dễ đọc
           .style("writing-mode", "vertical-rl")
