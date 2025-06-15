@@ -11,8 +11,8 @@
       background: white;
       padding: 20px;
       margin: 20px auto;
-      width: 794px; /* A4: 210mm = 794px at 96dpi */
-      height: 1123px; /* A4: 297mm = 1123px at 96dpi */
+      width: 794px;
+      height: 1123px;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
       page-break-after: always;
     }
@@ -44,16 +44,25 @@
           const sid = String(s.ID).replace('.0', '');
           const kids = data.filter(c => String(c["ID mẹ"]).replace('.0', '') === sid && String(c["ID cha"]).replace('.0', '') === id);
           const childrenList = kids.length ? kids.map(c => `&nbsp;&nbsp;+ ${c["Họ và tên"] || ""}`).join("<br>") : "&nbsp;&nbsp;<i>Không có con</i>";
-          return `- Với vợ: ${s["Họ và tên"] || "-"}` + "<br>" + childrenList;
-        }).join("<br><br>") : (children.length ? children.map(c => `+ ${c["Họ và tên"] || ""}`).join("<br>") : "-");
+
+          const detail = `
+            <div style='margin-left: 15px;'>
+              <b>- ${s["Họ và tên"] || "-"}</b><br>
+              ${s["Kỵ nhật"] ? `Kỵ nhật: ${s["Kỵ nhật"]}<br>` : ""}
+              ${s["Táng"] ? `Táng: ${s["Táng"]}<br>` : ""}
+              ${s["Thông tin chi tiết"] ? `Chi tiết: ${s["Thông tin chi tiết"]}<br>` : ""}
+              ${childrenList}
+            </div>`;
+
+          return detail;
+        }).join("<br>") : "-";
 
         const html = `
           <div class="page">
             <div class="line"><b>${p["Họ và tên"] || "-"} – Đời ${p["Đời"] || "-"}</b></div>
             <div class="line">${p["Năm sinh"] || "-"} – ${p["Năm mất"] || "-"}</div>
             <div class="line"><img src="images/${id}.png" onerror="this.style.display='none'" /></div>
-            <div class="line"><b>Vợ:</b><br>${spouse.length ? spouse.map(s => `- ${s["Họ và tên"] || "-"}`).join("<br>") : "-"}</div>
-            <div class="line"><b>Con:</b><br>${conTheoTungVo}</div>
+            <div class="line"><b>Vợ:</b><br>${conTheoTungVo}</div>
             <div class="line"><b>Thông tin chi tiết:</b><br>${p["Thông tin chi tiết"] || "-"}
               ${p["Kỵ nhật"] ? `<br><b>Kỵ nhật:</b> ${p["Kỵ nhật"]}` : ""}
               ${p["Táng"] ? `<br><b>Táng:</b> ${p["Táng"]}` : ""}
