@@ -43,7 +43,7 @@
         const conTheoTungVo = spouse.length ? spouse.map(s => {
           const sid = String(s.ID).replace('.0', '');
           const kids = data.filter(c => String(c["ID mẹ"]).replace('.0', '') === sid && String(c["ID cha"]).replace('.0', '') === id);
-          const childrenList = kids.length ? kids.map(c => `&nbsp;&nbsp;+ ${c["Họ và tên"] || ""}`).join("<br>") : "&nbsp;&nbsp;<i>Không có con</i>";
+          const childrenList = kids.length ? `Danh sách con:<br>` + kids.map(c => `&nbsp;&nbsp;+ ${c["Họ và tên"] || ""}`).join("<br>") : "&nbsp;&nbsp;<i>Không có con</i>";
 
           const detail = `
             <div style='margin-left: 15px;'>
