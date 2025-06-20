@@ -53,7 +53,6 @@
               ${s["Thông tin chi tiết"] ? `Chi tiết: ${s["Thông tin chi tiết"]}<br>` : ""}
               ${childrenList}
             </div>`;
-
           return detail;
         }).join("<br>") : "-";
 
@@ -73,16 +72,30 @@
       });
     }
 
+    function waitForImagesToLoad(container) {
+      const images = container.querySelectorAll("img");
+      const promises = Array.from(images).map(img => {
+        return new Promise(resolve => {
+          if (img.complete) return resolve();
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      return Promise.all(promises);
+    }
+
     function downloadPDF() {
       const element = document.getElementById("all-pages");
-      const opt = {
-        margin: 0,
-        filename: 'thong_tin_chi_tiet.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
+      waitForImagesToLoad(element).then(() => {
+        const opt = {
+          margin: 0,
+          filename: 'thong_tin_chi_tiet.pdf',
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+      });
     }
 
     fetch('input.xlsx')
@@ -93,8 +106,9 @@
         const json = XLSX.utils.sheet_to_json(sheet);
         renderPages(json);
       })
-      .catch(() => {
-        document.getElementById("all-pages").innerHTML = "Không thể tải dữ liệu.";
+      .catch((e) => {
+        console.error(e);
+        document.getElementById("all-pages").innerHTML = "Không thể tải dữ liệu. Hãy kiểm tra file input.xlsx đã được upload chưa.";
       });
   </script>
 </body>
