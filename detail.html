@@ -104,7 +104,7 @@
   const html = `
     <div class="line"><b>${person["Họ và tên"] || "-"} – Đời ${person["Đời"] || "-"}</b></div>
     <div class="line">${person["Năm sinh"] || "-"} – ${person["Năm mất"] || "-"}</div>
-    <div class="line"><img src="images/${id}.png" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
+    <div class="line"><img src="images/${id}.jpg" alt="${person["Họ và tên"]}" onerror="this.style.display='none'" /></div>
     <div class="line"><b>Vợ/Chồng:</b><br>
       ${spouse.length ? spouse.map(s => `- ${s["Họ và tên"] || "-"}`).join("<br>") : "-"}
     </div>
