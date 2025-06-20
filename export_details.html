@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Xuất PDF Thông tin Chi tiết</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body { font-family: Arial; padding: 20px; background: #f2f2f2; }
     .page {
@@ -12,7 +13,7 @@
       padding: 20px;
       margin: 20px auto;
       width: 794px;
-      height: 1123px;
+      min-height: 1123px;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
       page-break-after: always;
     }
@@ -72,30 +73,40 @@
       });
     }
 
-    function waitForImagesToLoad(container) {
+    async function waitForImagesToLoad(container) {
       const images = container.querySelectorAll("img");
       const promises = Array.from(images).map(img => {
         return new Promise(resolve => {
-          if (img.complete) return resolve();
-          img.onload = resolve;
-          img.onerror = resolve;
+          if (img.complete) resolve();
+          else {
+            img.onload = resolve;
+            img.onerror = resolve;
+          }
         });
       });
       return Promise.all(promises);
     }
 
-    function downloadPDF() {
-      const element = document.getElementById("all-pages");
-      waitForImagesToLoad(element).then(() => {
-        const opt = {
-          margin: 0,
-          filename: 'thong_tin_chi_tiet.pdf',
-          image: { type: 'jpeg', quality: 1 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
-      });
+    async function downloadPDF() {
+      const pages = document.querySelectorAll('.page');
+      await waitForImagesToLoad(document.getElementById("all-pages"));
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'px', 'a4');
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], { scale: 2 });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const pageWidth = 595.28;
+        const pageHeight = 841.89;
+        const imgWidth = pageWidth;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      }
+
+      pdf.save("thong_tin_chi_tiet.pdf");
     }
 
     fetch('input.xlsx')
