@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Chi tiết thành viên</title>
-  <base href="https://duongtoi88.github.io/Pha_he/">
+  <base href="https://duongtoi88.github.io/Phahe_ver3.2/">
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     body {
@@ -146,7 +146,18 @@
         renderPerson(id);
 
         const backBtn = document.getElementById("backToTree");
-        if (backBtn) backBtn.href = `index.html`;
+        
+        if (backBtn) {
+          const currentPerson = allRows.find(p => p.ID === id);
+          const fatherID = currentPerson?.["ID cha"];
+        
+          const targetID = fatherID
+            ? String(fatherID).replace('.0','').trim()
+            : id;
+        
+          backBtn.href = `index.html?select=${targetID}`;
+        }
+
         
         select.onchange = () => {
           const selectedID = select.value;
@@ -159,4 +170,5 @@
   </script>
 </body>
 </html>
+
 
