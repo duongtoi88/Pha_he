@@ -72,7 +72,7 @@
   if (isFemale) {
     const husband = allRows.find(p => String(p.ID).replace('.0', '') === String(person["ID chồng"]).replace('.0', ''));
     if (husband) spouse.push(husband);
-    allChildren = allRows.filter(c => String(c["ID mẹ"]).replace('.0', '') === id);
+    allChildren = allRows.filter(c => String(c["ID me"]).replace('.0', '') === id);
   } else {
     spouse = allRows.filter(w => String(w["ID chồng"]).replace('.0', '') === id);
     allChildren = allRows.filter(c => String(c["ID cha"]).replace('.0', '') === id);
@@ -89,7 +89,7 @@
         const sid = String(s.ID).replace('.0', '');
         const kids = isFemale
           ? allChildren.filter(c => String(c["ID cha"]).replace('.0', '') === sid)
-          : allChildren.filter(c => String(c["ID mẹ"]).replace('.0', '') === sid);
+          : allChildren.filter(c => String(c["ID me"]).replace('.0', '') === sid);
 
         const childrenList = kids.length
           ? kids.map(c => `&nbsp;&nbsp;+ ${String(c["Họ và tên"] || "").replace(/^[-–+]+\s*/, "")}`).join("<br>")
@@ -159,3 +159,4 @@
   </script>
 </body>
 </html>
+
